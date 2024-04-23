@@ -1,0 +1,8 @@
+__pycache__
+.pytest_cache
+.DS_Store
+.ruff_cache
+*.pyd
+*.pyc
+*.pyo
+.coverage
