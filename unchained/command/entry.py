@@ -22,11 +22,15 @@ class CommandCenter(Group):
         self.unchained = unchained
         self._ready = False
 
-    def add_base_commands(self) -> None:
+    def add_base_commands(self, include: t.Sequence[str] | None = None) -> None:
+        enable_include = include is not None
+        include = include or []
         internal_command_dir = Path(unchained.__path__[0] + "/command/internal")
         for command_file in internal_command_dir.glob("*.py"):
             command_name = command_file.stem
             if command_name == "__init__":
+                continue
+            if enable_include and command_name not in include:
                 continue
             command_kls = import_string(
                 f"unchained.command.internal.{command_name}.Command"
@@ -46,3 +50,6 @@ class CommandCenter(Group):
 
         self._ready = True
         return None
+
+    def setup_cli(self):
+        self.add_base_commands(include=["startproject"])

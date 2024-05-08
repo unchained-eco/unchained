@@ -1,3 +1,4 @@
+import os
 import typing as t
 
 from pydantic import BaseModel
@@ -15,3 +16,7 @@ class AppRoute(BaseModel):
 
 class AppInfo(BaseModel):
     name: str
+
+
+PathLike = t.Union[str, bytes, os.PathLike]
+Context = t.Mapping[str, str | int | float]

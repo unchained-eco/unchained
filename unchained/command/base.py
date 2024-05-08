@@ -6,6 +6,8 @@ from click import Command as ClickCommand
 from click import Option, Parameter
 from jinja2 import Template
 
+from unchained import types as tp
+
 if t.TYPE_CHECKING:
     from unchained.core.applications import Unchained
 
@@ -89,7 +91,7 @@ class BaseCommand(ClickCommand, BaseCommandMethod):
 
 
 class BaseCommandWithTemplate(BaseCommand):
-    def add_arguments(self) -> t.Sequence[Option]:
+    def add_arguments(self) -> t.Sequence[Parameter]:
         cwd = Path.cwd()
         return [
             Option(
@@ -113,7 +115,12 @@ class BaseCommandWithTemplate(BaseCommand):
             ),
         ]
 
-    async def handle(self, name: str, directory: str, template: str) -> None:
+    async def handle(
+        self,
+        name: str,
+        directory: tp.PathLike,
+        template: tp.PathLike,
+    ) -> None:
         render_template = template
 
         if isinstance(render_template, str):
@@ -123,7 +130,11 @@ class BaseCommandWithTemplate(BaseCommand):
         if not render_dest.exists():
             render_dest.mkdir(parents=True, exist_ok=True)
 
-        context = {"project": name, "app_name": name}
+        context = {
+            "project": name,
+            "app_name": name,
+            "version": self.unchained.version,
+        }
 
         for root, _, files in render_template.walk():
             for f in files:
@@ -134,8 +145,8 @@ class BaseCommandWithTemplate(BaseCommand):
         self,
         root: Path,
         new_root: Path,
-        file_path: str,
-        context: t.Mapping[str, str | int | float],
+        file_path: tp.PathLike,
+        context: tp.Context,
     ) -> None:
         new_root_rendered = Path(Template(str(new_root)).render(**context))
         if not new_root_rendered.exists():

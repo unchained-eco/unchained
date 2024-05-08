@@ -2,7 +2,7 @@ import typing as t
 import warnings
 from pathlib import Path
 
-from unchained.typed import AppCommand
+from unchained.types import AppCommand
 from unchained.utils.module_loading import import_string
 
 

@@ -1,5 +1,5 @@
 """
-run module for jasmine
+run module for backend
 """
 
 import os
@@ -8,7 +8,7 @@ import warnings
 
 
 def main() -> None:
-    os.environ.setdefault("UNCHAINED_SETTINGS_MODULE", "jasmine.settings")
+    os.environ.setdefault("UNCHAINED_SETTINGS_MODULE", "backend.settings")
     try:
         from unchained.core.applications import Unchained
 

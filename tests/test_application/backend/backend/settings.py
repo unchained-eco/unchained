@@ -1,5 +1,5 @@
 """
-settings for project {{project}}
+settings for project backend
 """
 
 import typing as t
@@ -15,4 +15,4 @@ MIDDLEWARE: t.Sequence[str] = []
 
 DEBUG: bool = True
 
-ROOT_URLCONF: str = "{{project}}.urls"
+ROOT_URLCONF: str = "backend.urls"

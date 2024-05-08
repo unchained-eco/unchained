@@ -13,6 +13,8 @@ from unchained.middleware.base import MiddleWareCenter
 
 
 class Unchained(Starlette):
+    version = "0.0.1"
+
     def __init__(
         self,
         debug: bool = False,
@@ -86,6 +88,10 @@ class Unchained(Starlette):
                 self.router.routes.append(route)
 
             self._ready = True
+
+    def setup_cli(self):
+        self._command_center = CommandCenter(unchained=self)
+        self._command_center.setup_cli()
 
     def execute_command_from_argv(self):
         self._command_center.main()
