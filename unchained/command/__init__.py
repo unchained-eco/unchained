@@ -1,4 +1,4 @@
 from .base import BaseCommand, BaseCommandWithTemplate
-from .entry import CommandCenter
+from .registry import CommandCenter
 
 __all__ = ["BaseCommand", "BaseCommandWithTemplate", "CommandCenter"]

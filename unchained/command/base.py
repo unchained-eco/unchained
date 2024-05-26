@@ -6,15 +6,11 @@ from click import Command as ClickCommand
 from click import Option, Parameter
 from jinja2 import Template
 
-from unchained import types as tp
+from unchained import type as tp
+from unchained.protocol import BaseCommandMethod
 
 if t.TYPE_CHECKING:
-    from unchained.core.applications import Unchained
-
-
-class BaseCommandMethod[T: t.Any](t.Protocol):
-    def add_arguments(self) -> t.Sequence[Parameter]: ...
-    async def handle(self, **option: t.Optional[t.Any]) -> t.Optional[T]: ...
+    from unchained.core import Unchained
 
 
 class BaseCommand(ClickCommand, BaseCommandMethod):
@@ -49,7 +45,9 @@ class BaseCommand(ClickCommand, BaseCommandMethod):
     def __init__(
         self,
         unchained: "Unchained",
-        name: str | None = None,
+        name: str,
+        app_label: str,
+        *,
         context_settings: t.MutableMapping[str, t.Any] | None = None,
         callback: t.Callable[..., t.Any] | None = None,
         params: t.List[Parameter] | None = None,
@@ -68,6 +66,7 @@ class BaseCommand(ClickCommand, BaseCommandMethod):
         callback = self._callback
 
         self.unchained = unchained
+        self.app_label = app_label
 
         super().__init__(
             name,

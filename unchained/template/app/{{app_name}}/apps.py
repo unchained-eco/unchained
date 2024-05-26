@@ -1,4 +1,4 @@
-from unchained.apps import AppConfig as _AppConfig
+from unchained.app import AppConfig as _AppConfig
 
 
 class AppConfig(_AppConfig):

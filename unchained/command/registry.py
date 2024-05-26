@@ -6,8 +6,10 @@ from click import Group
 import unchained
 from unchained.utils.module_loading import import_string
 
+from .base import BaseCommand
+
 if t.TYPE_CHECKING:
-    from unchained.core.applications import Unchained
+    from unchained.core import Unchained
 
 
 class CommandCenter(Group):
@@ -15,10 +17,11 @@ class CommandCenter(Group):
         self,
         unchained: "Unchained",
         name: str | None = None,
-        command_mapping: t.Mapping[str, str] | None = None,
+        commands: t.List[BaseCommand] | None = None,
     ) -> None:
-        super().__init__(name, None)
-        self._command_mapping = command_mapping
+        if commands is None:
+            commands = []
+        super().__init__(name=name, commands={c.name: c for c in commands})
         self.unchained = unchained
         self._ready = False
 
@@ -32,20 +35,21 @@ class CommandCenter(Group):
                 continue
             if enable_include and command_name not in include:
                 continue
-            command_kls = import_string(
+            command_kls: BaseCommand = import_string(
                 f"unchained.command.internal.{command_name}.Command"
             )
 
             escaped = command_name.replace("_", "-")
-            self.add_command(command_kls(unchained=self.unchained, name=escaped))
+            cmd = command_kls(
+                unchained=self.unchained,
+                app_label="unchained.command.internal",
+                name=escaped,
+            )
+            self.add_command(cmd)
 
     def setup(self):
         if self._ready:
             return
-
-        for command_name, command_path in self._command_mapping.items():
-            command_kls = import_string(command_path)
-            self.add_command(command_kls(unchained=self.unchained, name=command_name))
         self.add_base_commands()
 
         self._ready = True

@@ -6,10 +6,11 @@ from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.routing import BaseRoute
 
-from unchained.apps.registry import AppCenter
+from unchained.app.registry import AppCenter
 from unchained.command import CommandCenter
 from unchained.conf import BaseSettings
 from unchained.middleware.base import MiddleWareCenter
+from unchained.orm.registry import ModelsCenter
 
 
 class Unchained(Starlette):
@@ -25,22 +26,82 @@ class Unchained(Starlette):
         self._settings: BaseSettings = None
         self._app_center: AppCenter = None
         self._command_center: CommandCenter = None
+        self._models_center: ModelsCenter = None
         super().__init__(debug=debug, routes=routes, middleware=middleware)
 
     @property
     def settings(self) -> BaseSettings:
         if not self._settings:
-            self._settings = BaseSettings.setup()
+            self.setup_settings()
 
         return self._settings
+
+    @property
+    def app_center(self) -> AppCenter:
+        if not self._app_center:
+            self.setup_app()
+
+        return self._app_center
+
+    @property
+    def command_center(self) -> CommandCenter:
+        if not self._command_center:
+            self.setup_commands()
+
+        return self._command_center
+
+    @property
+    def models_center(self) -> ModelsCenter:
+        if not self._models_center:
+            self.setup_models()
+
+        return self._models_center
+
+    def setup_settings(self) -> None:
+        self._settings = BaseSettings.setup()
+
+    def setup_app(self):
+        self._app_center = AppCenter(self, self.settings.INSTALLED_APPS)
+        self._app_center.setup()
+
+    def setup_commands(self):
+        self._command_center = CommandCenter(
+            unchained=self,
+            name=self.settings.PROJECT_NAME,
+            commands=self.app_center.commands,
+        )
+        self._command_center.setup()
+
+    def setup_models(self):
+        self._models_center = ModelsCenter(
+            unchained=self,
+            models=self.app_center.models,
+        )
+
+    def setup_middlewares(self):
+        # load middlewares
+        middleware_center = MiddleWareCenter(self.settings.MIDDLEWARE)
+        middleware_center.setup()
+
+        for m in middleware_center.middlewares:
+            self.add_middleware(m)
+
+    def setup_routes(self):
+        # add routes from settings.ROOT_URLCONF
+        root_url_module = import_module(self.settings.ROOT_URLCONF)
+
+        if not hasattr(root_url_module, "urlpatterns"):
+            raise ValueError("ROOT_URLCONF should have urlpatterns defined")
+
+        for route in root_url_module.urlpatterns:
+            # TODO
+            # check if route is a valid route
+            # check if route app is installed
+            self.router.routes.append(route)
 
     def setup(self) -> None:
         """
         steps to setup the application
-            1. load the settings
-            2. load all apps
-            3. loop through all apps and call the setup method
-            4. add internal command and apps' command
         """
 
         if self._ready:
@@ -49,43 +110,14 @@ class Unchained(Starlette):
             if self._ready:
                 return
 
-            # load settings
-            self.settings
+            self.setup_settings()
+            self.setup_app()
 
-            # load apps
-            self._app_center = AppCenter(self, self.settings.INSTALLED_APPS)
-            self._app_center.setup()
+            self.setup_commands()
+            self.setup_models()
 
-            # load commands
-            command_mapping: t.Mapping[str, str] = {}
-            for app_name, app_config in self._app_center.info.items():
-                for command in app_config.commands:
-                    if command.name in command_mapping:
-                        raise ValueError(
-                            f"Command {command.name} is already defined in {command_mapping[command.name]}"
-                        )
-                    command_mapping[command.name] = command.import_path
-
-            self._command_center = CommandCenter(
-                unchained=self, command_mapping=command_mapping
-            )
-            self._command_center.setup()
-
-            # load middlewares
-            middleware_center = MiddleWareCenter(self.settings.MIDDLEWARE)
-            middleware_center.setup()
-
-            for m in middleware_center.middlewares:
-                self.add_middleware(m)
-
-            # add routes from settings.ROOT_URLCONF
-            root_url_module = import_module(self.settings.ROOT_URLCONF)
-
-            if not hasattr(root_url_module, "urlpatterns"):
-                raise ValueError("ROOT_URLCONF should have urlpatterns defined")
-
-            for route in root_url_module.urlpatterns:
-                self.router.routes.append(route)
+            self.setup_middlewares()
+            self.setup_routes()
 
             self._ready = True
 

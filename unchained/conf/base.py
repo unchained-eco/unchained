@@ -4,17 +4,12 @@ import typing as t
 
 from pydantic import BaseModel
 
-type CanBeImported = str
-type Email = str
-type TimeZone = str
-
-
-type InstalledApp = t.Sequence[CanBeImported]
-type Middlewares = t.Sequence[CanBeImported]
+from unchained.const import UNCHAINED_SETTINGS_MODULE
+from unchained.type import InstalledApp, Middlewares
 
 
 def get_settings_module() -> t.Mapping:
-    settings_module = os.environ.get("UNCHAINED_SETTINGS_MODULE")
+    settings_module = os.environ.get(UNCHAINED_SETTINGS_MODULE)
     if not settings_module:
         raise Exception("UNCHAINED_SETTINGS_MODULE environment variable is not set")
     try:
@@ -30,6 +25,8 @@ class BaseSettings(BaseModel):
     MIDDLEWARE: Middlewares
     DEBUG: bool
     ROOT_URLCONF: str
+    DATABASE: t.Mapping | None = None
+    PROJECT_NAME: str
 
     @classmethod
     def setup(cls):

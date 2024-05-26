@@ -1,11 +1,11 @@
 import typing as t
 from threading import Lock
 
-from unchained.apps.base import AppConfig
+from unchained.app.base import AppConfig
 from unchained.utils.module_loading import import_string
 
 if t.TYPE_CHECKING:
-    from unchained.core.applications import Unchained
+    from unchained.core import Unchained
 
 
 class AppCenter:
@@ -16,14 +16,12 @@ class AppCenter:
         self._ready = False
         self._loading = False
         self._lock = Lock()
-        self._data: t.Mapping[str, AppConfig] = {}
+        self._app_list = []
 
-    @property
-    def info(self) -> t.Mapping[str, AppConfig]:
-        if not self._ready:
-            self.setup()
-
-        return self._data
+        self.commands = []
+        self.models = []
+        # self.urls = []
+        # self.admin_models = []
 
     def setup(self) -> None:
         if self._ready:
@@ -41,19 +39,33 @@ class AppCenter:
             app_list: t.Sequence[AppConfig] = []
             for app_path in self.installed_apps:
                 temp_app = self.load_app(app_path)
+
+                self.register_commands(temp_app)
+                self.register_models(temp_app)
+
                 app_list.append(temp_app)
 
-            for app in app_list:
-                self._data[app.name] = app
+            self._app_list = app_list
 
             self._ready = True
+            self._loading = False
 
         return None
 
     def load_app(self, app_path: str) -> AppConfig:
         if not app_path.endswith(".AppConfig"):
-            app_path += "apps.AppConfig"
-        app: AppConfig = import_string(app_path)
+            app_path += ".app.AppConfig"
+        app_cls: t.Type[AppConfig] = import_string(app_path)
+
+        app: AppConfig = app_cls(self.unchained)
         app.setup()
 
         return app
+
+    def register_commands(self, app: AppConfig) -> None:
+        self.commands.extend(app.commands)
+
+    def register_models(self, app: AppConfig) -> None:
+        # TODO
+        # validate there are no duplicate db_table
+        self.models.extend(app.models)

@@ -1,4 +1,4 @@
-from unchained.core.applications import Unchained
+from unchained.core import Unchained
 
 if __name__ == "__main__":
     app = Unchained()

@@ -10,7 +10,7 @@ import warnings
 def main() -> None:
     os.environ.setdefault("UNCHAINED_SETTINGS_MODULE", "{{project}}.settings")
     try:
-        from unchained.core.applications import Unchained
+        from unchained.core import Unchained
 
         unchained = Unchained()
         unchained.setup()
