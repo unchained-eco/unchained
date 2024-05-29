@@ -6,7 +6,7 @@ if t.TYPE_CHECKING:
 from unchained.protocol import OrmModel
 
 
-class ModelsCenter:
+class ModelCenter:
     def __init__(
         self,
         unchained: "Unchained",

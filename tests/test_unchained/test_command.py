@@ -41,7 +41,7 @@ async def test_project_app_create(tmp_path: Path):
     assert (tmp_path / "backend" / "app" / "models.py").exists()
     assert (tmp_path / "backend" / "app" / "urls.py").exists()
     assert (tmp_path / "backend" / "app" / "admin.py").exists()
-    assert (tmp_path / "backend" / "app" / "apps.py").exists()
+    assert (tmp_path / "backend" / "app" / "app.py").exists()
     assert (tmp_path / "backend" / "app" / "tests").exists()
     assert (tmp_path / "backend" / "app" / "tests" / "test_all.py").exists()
 

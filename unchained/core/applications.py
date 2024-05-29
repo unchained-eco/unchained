@@ -5,12 +5,13 @@ from threading import Lock
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.routing import BaseRoute
+from starlette.types import ASGIApp
 
 from unchained.app.registry import AppCenter
 from unchained.command import CommandCenter
 from unchained.conf import BaseSettings
-from unchained.middleware.base import MiddleWareCenter
-from unchained.orm.registry import ModelsCenter
+from unchained.middleware.registry import MiddleWareCenter
+from unchained.orm.registry import ModelCenter
 
 
 class Unchained(Starlette):
@@ -26,7 +27,7 @@ class Unchained(Starlette):
         self._settings: BaseSettings = None
         self._app_center: AppCenter = None
         self._command_center: CommandCenter = None
-        self._models_center: ModelsCenter = None
+        self._model_center: ModelCenter = None
         super().__init__(debug=debug, routes=routes, middleware=middleware)
 
     @property
@@ -51,11 +52,11 @@ class Unchained(Starlette):
         return self._command_center
 
     @property
-    def models_center(self) -> ModelsCenter:
-        if not self._models_center:
+    def model_center(self) -> ModelCenter:
+        if not self._model_center:
             self.setup_models()
 
-        return self._models_center
+        return self._model_center
 
     def setup_settings(self) -> None:
         self._settings = BaseSettings.setup()
@@ -73,10 +74,14 @@ class Unchained(Starlette):
         self._command_center.setup()
 
     def setup_models(self):
-        self._models_center = ModelsCenter(
-            unchained=self,
-            models=self.app_center.models,
-        )
+        # self._model_center = ModelCenter(
+        #     unchained=self,
+        #     models=self.app_center.models,
+        # )
+
+        # TODO
+        # wait for orm to be implemented
+        pass
 
     def setup_middlewares(self):
         # load middlewares
@@ -127,3 +132,33 @@ class Unchained(Starlette):
 
     def execute_command_from_argv(self):
         self._command_center.main()
+
+    def build_middleware_stack(self) -> ASGIApp:
+        # debug = self.debug
+        # error_handler = None
+        # exception_handlers: dict[
+        #     t.Any, t.Callable[[Request, Exception], Response]
+        # ] = {}
+
+        # for key, value in self.exception_handlers.items():
+        #     if key in (500, Exception):
+        #         error_handler = value
+        #     else:
+        #         exception_handlers[key] = value
+
+        # middleware = (
+        #     [Middleware(ServerErrorMiddleware, handler=error_handler, debug=debug)]
+        #     + self.user_middleware
+        #     + [
+        #         Middleware(
+        #             ExceptionMiddleware, handlers=exception_handlers, debug=debug
+        #         )
+        #     ]
+        # )
+
+        middleware = self.user_middleware
+
+        app = self.router
+        for cls, args, kwargs in reversed(middleware):
+            app = cls(app=app, *args, **kwargs)
+        return app

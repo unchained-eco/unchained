@@ -6,7 +6,7 @@ from click import Command as ClickCommand
 from click import Option, Parameter
 from jinja2 import Template
 
-from unchained import type as tp
+from unchained import types as tp
 from unchained.protocol import BaseCommandMethod
 
 if t.TYPE_CHECKING:

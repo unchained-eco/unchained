@@ -1,9 +1,4 @@
-"""
+from unchained.http import Request, Response  # noqa: F401
 
-from unchained.http import Request, Response
-
-
-async def hello(request: Request) -> Response:
-    return Response("Hello, world!")
-
-"""
+# async def hello(request: Request) -> Response:
+#     return Response("Hello, World!")
