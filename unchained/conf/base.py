@@ -5,7 +5,7 @@ import typing as t
 from pydantic import BaseModel
 
 from unchained.const import UNCHAINED_SETTINGS_MODULE
-from unchained.type import InstalledApp, Middlewares
+from unchained.types import InstalledApp, Middlewares
 
 
 def get_settings_module() -> t.Mapping:

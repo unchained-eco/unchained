@@ -6,5 +6,5 @@ MIDDLEWARE: t.Sequence[str] = []
 
 DEBUG: bool = True
 
-ROOT_URLCONF: str = "{{project}}.urls"
-PROJECT_NAME = "{{project}}"
+ROOT_URLCONF: str = "test_server.urls"
+PROJECT_NAME = "test_server"

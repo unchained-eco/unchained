@@ -67,5 +67,7 @@ class AppCenter:
 
     def register_models(self, app: AppConfig) -> None:
         # TODO
+        # wait for orm registry to be implemented
         # validate there are no duplicate db_table
-        self.models.extend(app.models)
+        # self.models.extend(app.models)
+        pass
