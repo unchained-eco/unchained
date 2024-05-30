@@ -3,7 +3,7 @@ name = "unchained"
 version = "0.0.1"
 description = "a django-like async python web framework"
 authors = ["xin.zhou <zhouxin576@gmail.com>"]
-license = "BSD 3-Clause \"New\" or \"Revised\""
+license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -24,7 +24,7 @@ pytest-cov = "^4.1.0"
 pytest-asyncio = "^0.23.6"
 
 [project.scripts]
-unchained-cli = "unchained.cli:main"
+unchained-cli = "unchained:main"
 
 [build-system]
 requires = ["poetry-core"]
